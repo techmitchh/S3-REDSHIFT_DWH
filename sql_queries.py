@@ -77,17 +77,16 @@ songplay_table_create = (""" CREATE TABLE IF NOT EXISTS songplays (
 """)
 
 user_table_create = (""" CREATE TABLE IF NOT EXISTS users (
-                            userId INT, 
+                            userId INT NULL, 
                             firstName VARCHAR, 
                             lastName VARCHAR, 
                             gender VARCHAR, 
-                            level VARCHAR,
-                            PRIMARY KEY(userId)
+                            level VARCHAR
                             );
 """)
 
 song_table_create = (""" CREATE TABLE IF NOT EXISTS songs (
-                            song_id VARCHAR PRIMARY KEY, 
+                            song_id VARCHAR, 
                             title VARCHAR, 
                             artist_id VARCHAR, 
                             year INT, 
@@ -96,7 +95,7 @@ song_table_create = (""" CREATE TABLE IF NOT EXISTS songs (
 """)
 
 artist_table_create = (""" CREATE TABLE IF NOT EXISTS artists (
-                              artist_id VARCHAR PRIMARY KEY, 
+                              artist_id VARCHAR, 
                               artist_name VARCHAR, 
                               artist_location VARCHAR, 
                               artist_latitude FLOAT, 
@@ -105,15 +104,16 @@ artist_table_create = (""" CREATE TABLE IF NOT EXISTS artists (
 """)
 
 time_table_create = (""" CREATE TABLE IF NOT EXISTS time (
-                            start_time TIMESTAMP 
+                            start_time TIMESTAMP,
+                            hour INT, 
+                            day INT, 
+                            week INT, 
+                            month INT, 
+                            year INT, 
+                            weekday INT
                             );
 """)
-                            # hour INT, 
-                            # day INT, 
-                            # weekofyear INT, 
-                            # month INT, 
-                            # year INT, 
-                            # weekday INT
+                            
 
 
 # STAGING TABLES
@@ -151,44 +151,47 @@ songplay_table_insert = ("""INSERT INTO songplays (start_time, user_id, level, s
                               WHERE staging_events.page = 'NextSong');
 """)
 
-# user_table_insert = ("""
-#                         INSERT INTO users
-#                         (SELECT userid,
-#                                 firstName,
-#                                 lastName,
-#                                 gender,
-#                                 level
-#                             FROM staging_events);
-# """)
+user_table_insert = ("""
+                        INSERT INTO users
+                        (SELECT userid,
+                                firstName,
+                                lastName,
+                                gender,
+                                level
+                            FROM staging_events);
+""")
 
-# song_table_insert = ("""
-#                         INSERT INTO songs
-#                         (SELECT song_id,
-#                                 title,
-#                                 artist_id,
-#                                 duration
-#                            FROM staging_songs);
-# """)
+song_table_insert = ("""
+                        INSERT INTO songs
+                        (SELECT song_id,
+                                title,
+                                artist_id,
+                                duration
+                           FROM staging_songs);
+""")
 
-# artist_table_insert = ("""
-#                         INSERT INTO artists
-#                         (SELECT artist_id,
-#                                 artist_name,
-#                                 artist_location,
-#                                 artist_lattitude,
-#                                 artist_longitude
-#                            FROM staging_songs);
-# """)
+artist_table_insert = ("""
+                        INSERT INTO artists
+                        (SELECT artist_id,
+                                artist_name,
+                                artist_location,
+                                artist_latitude,
+                                artist_longitude
+                           FROM staging_songs);
+""")
 
-# time_table_insert = ("""
-#                         INSERT INTO time
-#                         (SELECT TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second' AS start_time);
-# """)
-                        # EXTRACT (hour, start_time) AS hour,
-                        # EXTRACT (day, start_time) AS day,
-                        # EXTRACT (dow, start_time) AS day_of_week,
-                        # EXTRACT (month, start_time) AS month,
-                        # EXTRACT (year, start_time) AS year);
+time_table_insert = (""" INSERT INTO time
+                          (SELECT TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second' AS start_time,
+                                  EXTRACT (hour from start_time) AS hour,
+                                  EXTRACT (day from start_time) AS day,
+                                  EXTRACT (week from start_time) AS week,
+                                  EXTRACT (month from start_time) AS month,
+                                  EXTRACT (year from start_time) AS year,
+                                  EXTRACT (dow from start_time) AS weekday
+                             FROM staging_events);
+                        
+""")
+                        
 # QUERY LISTS
 
 create_table_queries    = [staging_events_table_create, staging_songs_table_create, songplay_table_create, user_table_create, song_table_create, artist_table_create, time_table_create]

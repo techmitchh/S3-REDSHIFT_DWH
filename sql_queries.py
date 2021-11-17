@@ -55,7 +55,7 @@ staging_songs_table_create = (""" CREATE TABLE IF NOT EXISTS staging_songs (
                                         num_songs         INTEGER,             
                                         song_id           VARCHAR(256),         
                                         title             VARCHAR(256),        
-                                        year              VARCHAR(256)
+                                        year              INTEGER
                                     );
 """)
 
@@ -132,7 +132,7 @@ staging_songs_copy = ("""
                         COPY staging_songs
                         FROM {}
                         IAM_ROLE {}
-                        FORMAT AS JSON 'AUTO' REGION {}
+                        FORMAT AS JSON 'auto' REGION {}
 """).format(SONG_DATA, ARN, REGION)
 
 # FINAL TABLES
@@ -149,7 +149,9 @@ songplay_table_insert = ("""INSERT INTO songplays (start_time, user_id, level, s
                                FROM staging_events
                                LEFT JOIN staging_songs
                                  ON staging_events.artist = staging_songs.artist_name
-                              WHERE staging_events.page = 'NextSong');
+                              WHERE staging_events.page = 'NextSong'
+                                AND song_id IS NOT NULL
+                                AND artist_id IS NOT NULL);
 """)
 
 user_table_insert = ("""
@@ -193,15 +195,10 @@ time_table_insert = (""" INSERT INTO time
                                   EXTRACT (dow from start_time) AS weekday
                              FROM staging_events);                     
 """)
-# DELETE DUPLICATES
-
-user_duplicate = (""" DELETE FROM
-
-""")            
+            
 # QUERY LISTS
 
 create_table_queries    = [staging_events_table_create, staging_songs_table_create, songplay_table_create, user_table_create, song_table_create, artist_table_create, time_table_create]
 drop_table_queries      = [staging_events_table_drop, staging_songs_table_drop, songplay_table_drop, user_table_drop, song_table_drop, artist_table_drop, time_table_drop]
 copy_table_queries      = [staging_events_copy, staging_songs_copy]
 insert_table_queries    = [songplay_table_insert, user_table_insert, song_table_insert, artist_table_insert, time_table_insert]
-delete_duplicates_queries = [user_duplicate]

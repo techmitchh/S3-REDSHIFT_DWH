@@ -4,7 +4,7 @@
 
 #### Project Overview
 
-As Sparkify's Data Engineer, I am tasked with building an ETL pipeline that extracts data from our S3, then stage the data in Redshift. Our data then needs to transform into a set of dimensional tables for the analytics team. The Analytiscs team will use the dimensional tables to find insights in what songs users are listening to. Once completed, the database and ETL pipeline can be tested by running queries given to me by the analytics team. Queried results will then be compared to the analytics team expected results.
+As Sparkify's Data Engineer, I am tasked with building an ETL pipeline that extracts data from our S3, then stage the data in Redshift. Our data then needs to transform into a set of dimensional tables for the analytics team. The Analytics team will use the dimensional tables to find insights in what songs users are listening to. Once completed, the database and ETL pipeline can be tested by running queries given to me by the analytics team. Queried results will then be compared to the analytics team expected results.
 
 #### Data Overview
 
@@ -26,6 +26,12 @@ There are 2 Datasets, `(SONG_DATA and lOG_DATA)`, and they're located in an S3 b
 - **etl.py**: ```Loads Staging Tables, Insert Tables```
 - **sql_queries.py**: Contains all necessary queries for _create_tables.py_ and _etl.py_
 
+##### Running project:
+
+In CLI run commands in this order: 
+- `python create_cluster.py`
+- `python create_tables.py`
+- `python etl.py`
 ***
 
 ### Schema

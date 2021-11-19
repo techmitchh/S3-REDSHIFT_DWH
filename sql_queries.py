@@ -139,13 +139,13 @@ staging_songs_copy = ("""
 
 songplay_table_insert = ("""INSERT INTO songplays (start_time, user_id, level, song_id, artist_id, session_id, location, user_agent)
                             (SELECT TIMESTAMP 'epoch' + staging_events.ts/1000 * INTERVAL '1 second' AS start_time,
-                                    staging_events.userid,
+                                    staging_events.userId,
                                     staging_events.level,
                                     staging_songs.song_id,
                                     staging_songs.artist_id,
-                                    staging_events.sessionid,
+                                    staging_events.sessionId,
                                     staging_events.location,
-                                    staging_events.useragent
+                                    staging_events.userAgent
                                FROM staging_events
                                LEFT JOIN staging_songs
                                  ON staging_events.artist = staging_songs.artist_name
@@ -156,9 +156,9 @@ songplay_table_insert = ("""INSERT INTO songplays (start_time, user_id, level, s
 
 user_table_insert = ("""
                         INSERT INTO users
-                        (SELECT user_id,
-                                first_name,
-                                last_name,
+                        (SELECT userId,
+                                firstName,
+                                lastName,
                                 gender,
                                 level
                            FROM staging_events

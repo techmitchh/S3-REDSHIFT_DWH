@@ -1,6 +1,8 @@
+import botocore
 import numpy as np
 import pandas as pd
 import boto3
+from botocore import errorfactory
 import configparser
 
 config = configparser.ConfigParser()
@@ -18,13 +20,6 @@ DB_NAME                = config.get('CLUSTER', 'DB_NAME')
 DB_CLUSTER_IDENTIFIER  = config.get('CLUSTER', 'DB_CLUSTER_IDENTIFIER')
 DB_USER                = config.get('CLUSTER', 'DB_USER')
 DB_PASSWORD            = config.get('CLUSTER', 'DB_PASSWORD')
-
-pd.DataFrame({"Param": 
-                ["DB_ROLE_NAME", "DB_CLUSTER_TYPE", "DB_NODE_TYPE", "DB_NAME", "DB_CLUSTER_IDENTIFIER", "DB_USER", "DB_PASSWORD"],
-              "Value":
-                [DB_ROLE_NAME, DB_CLUSTER_TYPE, DB_NODE_TYPE, DB_NAME, DB_CLUSTER_IDENTIFIER, DB_USER, DB_PASSWORD]
-            })
-
 
 # ESTABLISH RESOURCES TO CREATE AND CONNECT TO REDSHIFT CLUSTER
 s3 = boto3.resource('s3',
@@ -47,20 +42,23 @@ redshift = boto3.client('redshift',
 roleArn = iam.get_role(RoleName=DB_ROLE_NAME)['Role']['Arn']
 
 # CREATE CLUSTER
-response = redshift.create_cluster(
-    # ADD PARAMETER FOR HARDWARE
-    ClusterType=DB_CLUSTER_TYPE,
-    NodeType=DB_NODE_TYPE,
+try:
+    response = redshift.create_cluster(
+        # ADD PARAMETER FOR HARDWARE
+        ClusterType=DB_CLUSTER_TYPE,
+        NodeType=DB_NODE_TYPE,
 
-    # ADD PARAMETERS FOR IDENTIFIERS & CREDENTIALS
-    DBName=DB_NAME, 
-    ClusterIdentifier=DB_CLUSTER_IDENTIFIER,
-    MasterUsername=DB_USER,
-    MasterUserPassword=DB_PASSWORD, 
+        # ADD PARAMETERS FOR IDENTIFIERS & CREDENTIALS
+        DBName=DB_NAME, 
+        ClusterIdentifier=DB_CLUSTER_IDENTIFIER,
+        MasterUsername=DB_USER,
+        MasterUserPassword=DB_PASSWORD, 
 
-    # ADD PARAMETER FOR ROLE (TO ALLOW S3 ACCESS)
-    IamRoles=[roleArn]
-)
+        # ADD PARAMETER FOR ROLE (TO ALLOW S3 ACCESS)
+        IamRoles=[roleArn]
+    )
+except Exception as e:
+    print(e)
 
 # CHECK REDSHIFT CLUSTER STATUS
 def clusterProperties(props):
